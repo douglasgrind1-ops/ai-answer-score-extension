@@ -1,8 +1,28 @@
 console.log("AI Answer Score extension loaded.");
 
-function createBadge() {
+let badgeInserted = false;
 
+function findAssistantMessage() {
+  // Common selectors that may match ChatGPT message content.
+  const selectors = [
+    '[data-message-author-role="assistant"]',
+    'div[data-message-author-role="assistant"]',
+    'article'
+  ];
+
+  for (const selector of selectors) {
+    const nodes = document.querySelectorAll(selector);
+    if (nodes.length > 0) {
+      return nodes[nodes.length - 1];
+    }
+  }
+
+  return null;
+}
+
+function createBadge(targetElement) {
   if (document.getElementById("aas-test-badge")) return;
+  if (!targetElement) return;
 
   const badge = document.createElement("div");
   badge.id = "aas-test-badge";
@@ -17,13 +37,23 @@ function createBadge() {
     <button class="aas-button">View analysis</button>
   `;
 
-  document.body.appendChild(badge);
+  // Place the badge near the detected answer block.
+  badge.style.position = "relative";
+  badge.style.top = "auto";
+  badge.style.right = "auto";
+  badge.style.marginTop = "12px";
+  badge.style.marginLeft = "auto";
+  badge.style.width = "220px";
 
-  badge.querySelector(".aas-button").addEventListener("click", openPanel);
+  targetElement.appendChild(badge);
+
+  const button = badge.querySelector(".aas-button");
+  if (button) {
+    button.addEventListener("click", openPanel);
+  }
 }
 
 function openPanel() {
-
   if (document.getElementById("aas-panel")) return;
 
   const panel = document.createElement("div");
@@ -55,9 +85,23 @@ function openPanel() {
 
   document.body.appendChild(panel);
 
-  document.getElementById("aas-close").onclick = () => panel.remove();
+  const closeButton = document.getElementById("aas-close");
+  if (closeButton) {
+    closeButton.onclick = () => panel.remove();
+  }
 }
 
-window.addEventListener("load", () => {
-  setTimeout(createBadge, 1500);
-});
+function checkForAssistantResponse() {
+  if (badgeInserted) return;
+
+  const assistantMessage = findAssistantMessage();
+
+  if (assistantMessage) {
+    createBadge(assistantMessage);
+    badgeInserted = true;
+    console.log("AI Answer Score badge attached to assistant message.");
+  }
+}
+
+// Check repeatedly because ChatGPT content is dynamic.
+setInterval(checkForAssistantResponse, 2000);
