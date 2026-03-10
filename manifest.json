@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "AI Answer Score",
+  "version": "0.1.0",
+  "description": "A trust score for ChatGPT answers.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://chat.openai.com/*",
+    "https://chatgpt.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*"
+      ],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "AI Answer Score"
+  }
+}
